@@ -1,0 +1,40 @@
+{
+  "name": "hyper-express",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "lint": "npx eslint .",
+    "prettier": "npx prettier -c .",
+    "prettify": "npx prettier -w .",
+    "db:migrate": "npx sequelize db:migrate",
+    "db:migrate:create": "npx sequelize migration:generate --name",
+    "db:migrate:undo": "npx sequelize db:migrate:undo",
+    "db:migrate:status": "npx sequelize db:migrate:status",
+    "db:seed:create": "npx sequelize-cli seed:generate --name",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "convict": "^6.2.4",
+    "convict-format-with-validator": "^6.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "hyper-express": "^6.15.2",
+    "pg": "^8.11.5",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "sequelize-cli": "^6.6.2"
+  }
+}
