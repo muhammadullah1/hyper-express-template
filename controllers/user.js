@@ -6,15 +6,62 @@ const {
 const bcrypt = require("bcrypt");
 const { encrypt } = require("../utils/token");
 const ApiError = require("../utils/ApiError");
-const { FORGOT_PASSWORD } = require("../constants");
-const emailTemplate = require("../templates/email");
-const ses = require("../services/ses");
+
 
 module.exports = {
+  registerUser: async (req, res, next) => {
+    const transaction = await sequelize.transaction();
+    try {
+      const {
+        body: { firstName, lastName, email, password, termsAccepted },
+      } = req;
+
+      const user = await Users.findOne({
+        where: {
+          email,
+        },
+        transaction,
+      });
+
+      if (user) {
+        throw new ApiError(404, "Email already exists");
+      }
+
+     await Users.create(
+        {
+          firstName,
+          lastName,
+          email,
+          password,
+          termsAccepted,
+        },
+        { transaction }
+      );
+
+      await transaction.commit();
+      res.status(201).send({
+        success: true,
+        message: "User registered successfully.",
+      });
+    } catch (error) {
+      await transaction.rollback();
+      next(error);
+    }
+  },
   get: async (req, res, next) => {
     try {
-      res.send("you are at user controller");
+      const users = await Users.findAll();
+
+
+      res.status(200).json(users);
+
+      // res.status(200).send({
+      //   success: true,
+      //   message: "Users list",
+      //   data: users,
+      // });
     } catch (err) {
+      console.log("-----error in ctach block of controller ------", err);
       next(err);
     }
   },
@@ -134,26 +181,13 @@ module.exports = {
         transaction,
       });
       if (!user) throw new ApiError(404, "Invalid email address");
-
       const resetToken = encrypt(user, config.get("signIn.jwtSecret"));
-      const template = emailTemplate(
-        FORGOT_PASSWORD.body,
-        config.get("host") + FORGOT_PASSWORD.url,
-        resetToken,
-        FORGOT_PASSWORD.btnName,
-        FORGOT_PASSWORD.footer,
-        `${user.first_name || ""} ${user.last_name || ""}`
-      );
-      await ses(
-        FORGOT_PASSWORD.email,
-        user.email,
-        FORGOT_PASSWORD.subject,
-        template
-      );
+
       await transaction.commit();
       res.send({
         success: true,
         message: "Reset link sent to the given email",
+        data: resetToken
       });
     } catch (error) {
       await transaction.rollback();
